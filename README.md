@@ -3,10 +3,16 @@
 ### Usage
 
 - Create
-    POST / (with `file` param)
+    POST / (with `:file` param)
 - Read
-    GET /:id
+    GET /`:id`
 - Update
-    PUT /:id (with `file` param)
+    PUT /`:id` (with `:file` param)
 - Delete
-    DELETE /:id
+    DELETE /`:id`
+
+### To clone and start it do:
+
+ git clone https://github.com/durm/phmedia.git
+ cd phmedia
+ lein ring server-headless
