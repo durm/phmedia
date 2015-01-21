@@ -95,9 +95,36 @@
                )
   )
 
+(defn usage []
+  (html [:div
+         [:h1 "Ph-media"]
+         [:h2 "Static content storage"]
+         [:h3 "Usage"]
+         [:ul
+          [:li
+           [:h4 "Create"]
+           [:p "POST / (with `file` param)"]
+           ]
+          [:li
+           [:h4 "Read"]
+           [:p "GET /:id"]
+           ]
+          [:li
+           [:h4 "Update"]
+           [:p "PUT /:id (with `file` param)"]
+           ]
+          [:li
+           [:h4 "Delete"]
+           [:p "DELETE /:id"]
+           ]
+          ]
+         ]
+         )
+  )
+
 (defroutes main-routes
 
-  (GET "/" [] "Usage")
+  (GET "/" [] (usage))
 
   (GET "/:fid" [fid] (phread-response fid))
   (POST "/" {{{tempfile :tempfile filename :filename} :file} :params :as params} (phcreate-response tempfile))
