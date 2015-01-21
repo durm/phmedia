@@ -7,7 +7,6 @@
               [compojure.response :as response]
               (ring.middleware [multipart-params :as mp])
               [clojure.java.io :as io]
-              [ring.util.response :as resp]
               [clj-time.local :as l])
   (:gen-class)
   )
@@ -24,46 +23,90 @@
   ([] (get-file (uuid)))
   )
 
-(defn phcreate
-  ([tempfile]
-   (let [fid (uuid)
-         ofile (get-file fid)]
-     (io/copy tempfile ofile)
-     fid)
-   )
+; REST-functions
+(defn phcreate [tempfile ofile]
+  (if-not (.exists ofile)
+    (io/copy tempfile ofile)
+    (throw (Exception. "Resource exists."))
+    )
   )
-(defn phread [fid] (get-file fid))
-(defn phupdate [fid tempfile]
-  (let [ofile (get-file fid)]
-     (io/copy tempfile ofile)
-     fid)
+(defn phread [ofile]
+  (if (.exists ofile)
+    ofile
+    (throw (Exception. "Resource doesnot exist."))
+    )
   )
-(defn phdelete [fid]
-  (let [ofile (get-file fid)]
-     (io/delete-file ofile)
-     fid)
+(defn phupdate [tempfile ofile]
+  (if (.exists ofile)
+    (io/copy tempfile ofile)
+    (throw (Exception. "Resource doesnot exist."))
+    )
+  )
+(defn phdelete [ofile]
+  (if (.exists ofile)
+    (io/delete-file ofile)
+    (throw (Exception. "Resource doesnot exist."))
+    )
   )
 
+; Response
+(defn get-success-resp
+  [operation fid] (html [operation {:id fid :timestamp (l/local-now)}])
+  )
+
+; REST-responses
 (defn phcreate-response
-  [tempfile] (html [:created {:id (phcreate tempfile) :timestamp (l/local-now)}])
+  [tempfile] (let [fid (uuid) ofile (get-file fid)]
+               (try
+                 (do
+                   (phcreate tempfile ofile)
+                   (get-success-resp :created fid)
+                   )
+                 (catch Exception e (str "Exception: " (.getMessage e))))
+               )
   )
 (defn phread-response
-  [fid] (phread fid)
+  [fid] (let [ofile (get-file fid)]
+               (try
+                 (do
+                   (phread ofile)
+                   )
+                 (catch Exception e (str "Exception: " (.getMessage e))))
+               )
   )
 (defn phupdate-response
-  [fid tempfile] (html [:updated {:id (phupdate fid tempfile) :timestamp (l/local-now)}])
+  [fid tempfile] (let [ofile (get-file fid)]
+               (try
+                 (do
+                   (phupdate tempfile ofile)
+                   (get-success-resp :updated fid)
+                   )
+                 (catch Exception e (str "Exception: " (.getMessage e))))
+               )
   )
 (defn phdelete-response
-  [fid] (html [:deleted {:id (phdelete fid) :timestamp (l/local-now)}])
+  [fid] (let [ofile (get-file fid)]
+               (try
+                 (do
+                   (phdelete ofile)
+                   (get-success-resp :deleted fid)
+                   )
+                 (catch Exception e (str "Exception: " (.getMessage e))))
+               )
   )
 
 (defroutes main-routes
-  (GET "/" [] "as")
+
+  (GET "/" [] "Usage")
+
   (GET "/:fid" [fid] (phread-response fid))
   (POST "/" {{{tempfile :tempfile filename :filename} :file} :params :as params} (phcreate-response tempfile))
   (PUT "/:fid" {{{tempfile :tempfile filename :filename} :file fid :fid} :params :as params} (phupdate-response fid tempfile))
   (DELETE "/:fid" [fid] (phdelete-response fid))
-  (route/not-found "Page not found"))
+
+  (route/not-found "Page not found")
+
+  )
 
 (def app
   (-> (handler/site main-routes)
