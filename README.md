@@ -13,6 +13,6 @@
 
 ### To clone and start it do:
 
- git clone https://github.com/durm/phmedia.git
- cd phmedia
- lein ring server-headless
+> git clone https://github.com/durm/phmedia.git
+> cd phmedia
+> lein ring server-headless
