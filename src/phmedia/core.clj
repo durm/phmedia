@@ -5,7 +5,8 @@
               [compojure.handler :as handler]
               (ring.middleware [multipart-params :as mp])
               [phmedia.views :as phviews]
-              [phmedia.utils :as phutils])
+              [phmedia.utils :as phutils]
+              [ring.adapter.jetty :as ring])
   (:gen-class)
   )
 
@@ -27,3 +28,6 @@
       (mp/wrap-multipart-params)
       (wrap-base-url)
       ))
+
+(defn -main []
+  (ring/run-jetty app {:port 8080 :join? false}))

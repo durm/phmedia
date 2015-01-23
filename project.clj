@@ -4,6 +4,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :plugins [[lein-ring "0.9.1"]]
   :ring {:handler phmedia.core/app}
+  :main phmedia.core
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [compojure "1.3.1"]
                  [ring/ring-jetty-adapter "1.3.1"]
